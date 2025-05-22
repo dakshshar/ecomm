@@ -30,7 +30,7 @@ app.use(`${process.env.API_URL}`, require('./routes/user'));
 app.use(`${process.env.API_URL}`, require('./routes/logout'));
 
 
-mongoose.connect(process.env.MONGO_URI
+mongoose.connect(process.env.MONGODB_URI
     , {
         dbName: process.env.DB_NAME
     })
