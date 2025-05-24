@@ -28,6 +28,10 @@ app.use(morgan('tiny'));
 
 app.use(`${process.env.API_URL}`, require('./routes/user'));
 app.use(`${process.env.API_URL}`, require('./routes/logout'));
+app.use(`${process.env.API_URL}`, require('./routes/product'));
+const Coffee = require('./modules/products');
+// Connect to MongoDB
+
 
 
 mongoose.connect(process.env.MONGODB_URI
@@ -40,13 +44,25 @@ mongoose.connect(process.env.MONGODB_URI
 // Basic route
 app.get('/', (req, res) => {
     res.send('Hello from Express!');
+
 });
 
-app.get(`${process.env.API_URL}/products`, (req, res) => {
 
-console.log('Products route');
-    res.send('Products route');
+app.get(`${process.env.API_URL}/products`, async (req, res) => {
+  const coffeeData = await Coffee.find();
+  res.json(coffeeData);
 });
+
+// API route to add coffee (optional)
+app.post(`${process.env.API_URL}/products`, async (req, res) => {
+  const newCoffee = new Coffee(req.body);
+  await newCoffee.save();
+  res.status(201).json(newCoffee);
+});
+
+
+
+
 
 
 
