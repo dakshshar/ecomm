@@ -39,7 +39,7 @@ mongoose.connect(process.env.MONGODB_URI
         dbName: process.env.DB_NAME
     })
     .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection err or:', err));
+    .catch(err => console.error('MongoDB connection error:', err));
 
 // Basic route
 app.get('/', (req, res) => {

@@ -1,59 +1,35 @@
 const express = require('express');
+
 const router = express.Router();
-const Coffee = require('../modules/products');
 
-// Get all products
-router.get('/', async (req, res) => {
-  try {
-    const data = await Coffee.find();
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch products' });
-  }
+// Example: Get all products
+router.get('/', (req, res) => {
+    res.json({ message: 'List of products' });
 });
 
-// Get product by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const coffee = await Coffee.findById(req.params.id);
-    if (!coffee) return res.status(404).json({ error: 'Product not found' });
-    res.json(coffee);
-  } catch (err) {
-    res.status(500).json({ error: 'Error fetching product' });
-  }
+// Example: Get a single product by ID
+router.get('/:id', (req, res) => {
+    const { id } = req.params;
+    res.json({ message: `Product details for ID: ${id}` });
 });
 
-// Create a product
-router.post('/', async (req, res) => {
-  try {
-    const newCoffee = new Coffee(req.body);
-    const saved = await newCoffee.save();
-    res.status(201).json(saved);
-  } catch (err) {
-    res.status(400).json({ error: 'Invalid product data' });
-  }
+// Example: Create a new product
+router.post('/', (req, res) => {
+    // const newProduct = req.body;
+    res.status(201).json({ message: 'Product created' });
 });
 
-// Update product
-router.put('/:id', async (req, res) => {
-  try {
-    const updated = await Coffee.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ error: 'Product not found' });
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: 'Update failed' });
-  }
+// Example: Update a product by ID
+router.put('/:id', (req, res) => {
+    const { id } = req.params;
+    // const updatedProduct = req.body;
+    res.json({ message: `Product with ID: ${id} updated` });
 });
 
-// Delete product
-router.delete('/:id', async (req, res) => {
-  try {
-    const deleted = await Coffee.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: 'Product not found' });
-    res.json({ message: 'Product deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ error: 'Delete failed' });
-  }
+// Example: Delete a product by ID
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
+    res.json({ message: `Product with ID: ${id} deleted` });
 });
 
 module.exports = router;
