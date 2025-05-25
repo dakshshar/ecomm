@@ -1,72 +1,38 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
-const app = express();
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-const db = mongoose.connection;
 
+const app = express();
 
-
-
-
-require('dotenv/config');
-
-// Load environment variables from .env file
+// Load environment variables
 dotenv.config();
-// Connect to MongoDB               
 
-
-// Middleware to parse JSON
+// Middleware
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(express.json({ 
-    extended: true }));
-
 app.use(morgan('tiny'));
 
-
-app.use(`${process.env.API_URL}`, require('./routes/user'));
-app.use(`${process.env.API_URL}`, require('./routes/logout'));
-app.use(`${process.env.API_URL}`, require('./routes/product'));
-const Coffee = require('./modules/products');
 // Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  dbName: process.env.DB_NAME,
+})
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection e rror:', err));
 
+// API Routes
+app.use(`${process.env.API_URL}/users`, require('./routes/user'));
+app.use(`${process.env.API_URL}/logout`, require('./routes/logout'));
+app.use(`${process.env.API_URL}/products`, require('./routes/product'));
 
-
-mongoose.connect(process.env.MONGODB_URI
-    , {
-        dbName: process.env.DB_NAME
-    })
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
-
-// Basic route
+// Default route
 app.get('/', (req, res) => {
-    res.send('Hello from Express!');
-
+  res.send('Hello from Express!');
 });
-
-
-app.get(`${process.env.API_URL}/products`, async (req, res) => {
-  const coffeeData = await Coffee.find();
-  res.json(coffeeData);
-});
-
-// API route to add coffee (optional)
-app.post(`${process.env.API_URL}/products`, async (req, res) => {
-  const newCoffee = new Coffee(req.body);
-  await newCoffee.save();
-  res.status(201).json(newCoffee);
-});
-
-
-
-
-
-
 
 // Start server
-app.listen(process.env.PORT, () => {
-    console.log(`Server running at ${process.env.PORT}`);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
