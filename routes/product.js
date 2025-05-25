@@ -14,9 +14,8 @@ router.get('/', async (req, res) => {
 
 // Get product by ID
 router.get('/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    const coffee = await Coffee.findById(id);
+    const coffee = await Coffee.findById(req.params.id);
     if (!coffee) {
       return res.status(404).json({ error: 'Product not found' });
     }
@@ -39,9 +38,8 @@ router.post('/', async (req, res) => {
 
 // Update product by ID
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    const updated = await Coffee.findByIdAndUpdate(id, req.body, { new: true });
+    const updated = await Coffee.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) {
       return res.status(404).json({ error: 'Product not found' });
     }
@@ -53,9 +51,8 @@ router.put('/:id', async (req, res) => {
 
 // Delete product by ID
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    const deleted = await Coffee.findByIdAndDelete(id);
+    const deleted = await Coffee.findByIdAndDelete(req.params.id);
     if (!deleted) {
       return res.status(404).json({ error: 'Product not found' });
     }

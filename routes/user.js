@@ -4,47 +4,29 @@ const User = require('../modules/User');
 const bcryptjs = require('bcryptjs');
 const user_jwt = require('../middleware/user_jwt');
 const jwt = require('jsonwebtoken');
-const dbConnect = require('../db');  // <-- Make sure this is correct path and export
 
 // Get current user (protected)
 router.get('/', user_jwt, async (req, res) => {
   try {
-    await dbConnect();
-
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        msg: 'User not found',
-      });
+      return res.status(404).json({ success: false, msg: 'User not found' });
     }
-
-    res.status(200).json({
-      success: true,
-      user,
-    });
+    res.status(200).json({ success: true, user });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({
-      success: false,
-      msg: 'Server Error',
-    });
+    res.status(500).json({ success: false, msg: 'Server Error' });
   }
 });
 
-// Register new user
+// Register user
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    await dbConnect();
-
     const userExist = await User.findOne({ email });
     if (userExist) {
-      return res.status(400).json({
-        success: false,
-        msg: 'User already exists',
-      });
+      return res.status(400).json({ success: false, msg: 'User already exists' });
     }
 
     const salt = await bcryptjs.genSalt(10);
@@ -59,32 +41,19 @@ router.post('/register', async (req, res) => {
 
     await newUser.save();
 
-    const payload = {
-      user: {
-        id: newUser.id,
-      },
-    };
+    const payload = { user: { id: newUser.id } };
 
     jwt.sign(payload, process.env.jwtUserSecret, { expiresIn: 360000 }, (err, token) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({
-          success: false,
-          msg: 'Error signing token',
-        });
+        return res.status(500).json({ success: false, msg: 'Error signing token' });
       }
 
-      res.status(200).json({
-        success: true,
-        token,
-      });
+      res.status(200).json({ success: true, token });
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      success: false,
-      msg: 'Server error',
-    });
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 });
 
@@ -93,52 +62,33 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    await dbConnect();
-
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        msg: 'User does not exist. Please register.',
-      });
+      return res.status(400).json({ success: false, msg: 'User does not exist. Please register.' });
     }
 
     const isMatch = await bcryptjs.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        msg: 'Invalid password',
-      });
+      return res.status(400).json({ success: false, msg: 'Invalid password' });
     }
 
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
+    const payload = { user: { id: user.id } };
 
     jwt.sign(payload, process.env.jwtUserSecret, { expiresIn: 360000 }, (err, token) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({
-          success: false,
-          msg: 'Error signing token',
-        });
+        return res.status(500).json({ success: false, msg: 'Error signing token' });
       }
 
-      res.status(200).json({
-        success: true,
-        msg: 'User logged in',
-        token,
-        user,
-      });
+      // Remove password from user before sending response
+      const userData = user.toObject();
+      delete userData.password;
+
+      res.status(200).json({ success: true, msg: 'User logged in', token, user: userData });
     });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({
-      success: false,
-      msg: 'Server Error',
-    });
+    res.status(500).json({ success: false, msg: 'Server Error' });
   }
 });
 
